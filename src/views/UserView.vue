@@ -5,6 +5,7 @@
     </el-header>
     <el-container>
       <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+        <!-- 加了 router 属性和 default-active，用于路由跳转和菜单高亮 -->
         <el-menu :default-openeds="['1']" :default-active="$route.path" router>
           <el-submenu index="1">
             <template slot="title">
@@ -12,7 +13,6 @@
             </template>
             <el-menu-item-group>
               <template slot="title">用户与题目</template>
-              <!-- 使用 index 属性指定路由路径即可实现跳转 -->
               <el-menu-item index="/user">用户管理</el-menu-item>
               <el-menu-item index="/question">题目管理</el-menu-item>
             </el-menu-item-group>
@@ -21,7 +21,7 @@
       </el-aside>
 
       <el-main>
-        <!-- 这里是 UserView 原本的内容（用户管理表格等） -->
+        <!-- 顶部的查询表单 -->
         <el-form :inline="true" :model="formInline" class="demo-form-inline">
           <el-form-item label="用户名">
             <el-input v-model="formInline.user" placeholder="请输入用户名"></el-input>
@@ -29,9 +29,14 @@
           <el-form-item>
             <el-button type="primary" @click="onSubmit">查询</el-button>
           </el-form-item>
+          <!-- 恢复：添加用户按钮 -->
+          <el-form-item>
+            <el-button type="success" @click="onAddNewUser">添加用户</el-button>
+          </el-form-item>
         </el-form>
 
-        <el-table :data="tableData" style="width: 80%">
+        <!-- 显示的table -->
+        <el-table :data="tableData" style="width: 60%">
           <el-table-column label="日期" width="180">
             <template slot-scope="scope">
               <i class="el-icon-time"></i>
@@ -40,7 +45,13 @@
           </el-table-column>
           <el-table-column label="姓名" width="180">
             <template slot-scope="scope">
-              <el-tag size="medium">{{ scope.row.name }}</el-tag>
+              <el-popover trigger="hover" placement="top">
+                <p>姓名：{{ scope.row.name }}</p>
+                <p>住址：{{ scope.row.address }}</p>
+                <div slot="reference" class="name-wrapper">
+                  <el-tag size="medium">{{ scope.row.name }}</el-tag>
+                </div>
+              </el-popover>
             </template>
           </el-table-column>
           <el-table-column label="操作">
@@ -50,6 +61,30 @@
             </template>
           </el-table-column>
         </el-table>
+
+        <br />
+        <!-- 分页 -->
+        <el-pagination background layout="prev, pager, next" :total="1000">
+        </el-pagination>
+
+        <!-- 恢复：弹出的添加用户的会话框 -->
+        <el-dialog title="添加新用户" :visible.sync="dialogFormVisible">
+          <el-form :model="form">
+            <el-form-item label="用户名" :label-width="formLabelWidth">
+              <el-input v-model="form.name" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" :label-width="formLabelWidth">
+              <el-input v-model="form.password" type="password" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="确认密码" :label-width="formLabelWidth">
+              <el-input v-model="form.confirmpassword" type="password" autocomplete="off"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+          </div>
+        </el-dialog>
       </el-main>
     </el-container>
   </el-container>
@@ -60,24 +95,73 @@ export default {
   name: "UserView",
   data() {
     return {
-      formInline: { user: "" },
+      dialogFormVisible: false,
+      formLabelWidth: "90px",
+
+      form: {
+        name: "",
+        password: "",
+        confirmpassword: "",
+      },
+
+      formInline: {
+        user: "",
+        region: "",
+      },
+
+      // 恢复：完整的 4 条数据
       tableData: [
-        { date: "2016-05-02", name: "王小虎" },
-        { date: "2016-05-04", name: "王小虎" }
-      ]
+        {
+          date: "2016-05-02",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1518 弄",
+        },
+        {
+          date: "2016-05-04",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1517 弄",
+        },
+        {
+          date: "2016-05-01",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1519 弄",
+        },
+        {
+          date: "2016-05-03",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1516 弄",
+        },
+      ],
     };
   },
   methods: {
-    onSubmit() { console.log("submit!"); },
-    handleEdit(index, row) { console.log(index, row); },
-    handleDelete(index, row) { console.log(index, row); }
-  }
+    onAddNewUser() {
+      this.dialogFormVisible = true;
+    },
+    onSubmit() {
+      console.log("submit!");
+    },
+    handleEdit(index, row) {
+      console.log(index, row);
+    },
+    handleDelete(index, row) {
+      console.log(index, row);
+    },
+  },
 };
 </script>
 
 <style scoped>
+.name-wrapper {
+  cursor: pointer;
+}
+
 .demo-form-inline {
   padding: 16px 16px 0;
   background-color: #fff;
+}
+
+.dialog-footer {
+  text-align: right;
 }
 </style>
